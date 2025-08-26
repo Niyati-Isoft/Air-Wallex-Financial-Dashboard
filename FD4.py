@@ -38,6 +38,7 @@ if not exp_file and not bal_file:
 elif not exp_file or not bal_file:
     st.error("❌ Please upload both files to proceed.")
     st.stop()
+
 balance_file = pd.read_csv(bal_file, encoding="utf-8-sig")
 expense_file = pd.read_csv(exp_file, encoding="utf-8-sig")
 
@@ -174,7 +175,7 @@ df["Debit Net Amount"]  = pd.to_numeric(df.get("Debit Net Amount", 0.0),  errors
 df["Credit Net Amount"] = pd.to_numeric(df.get("Credit Net Amount", 0.0), errors="coerce").fillna(0.0)
 
 # Spend-only amount for pies/charts = debits
-df["PieAmount"] = df["Debit Net Amount"]
+df["Final_Amount"] = df["Debit Net Amount"]
 
 # (Optional safety fallback — only used if a row somehow has both 0s)
 t_upper = df["Type"].astype(str).str.upper()
@@ -273,7 +274,7 @@ filtered_df['MonthLabel'] = pd.Categorical(filtered_df['MonthLabel'], categories
 # Pie-safe amount: credits for DEPOSIT, debits for CARD/PAYOUT
 
 t_upper = filtered_df['Type'].astype(str).str.upper()
-filtered_df['PieAmount'] = np.select(
+filtered_df['Final_Amount'] = np.select(
     [t_upper.eq('DEPOSIT'), t_upper.eq('CARD'), t_upper.eq('PAYOUT')],
     [filtered_df['Credit Net Amount'], filtered_df['Debit Net Amount'], filtered_df['Debit Net Amount']],
     default=filtered_df['Debit Net Amount']
@@ -393,8 +394,8 @@ if "All" in selected_users:
 
     pie_type_df = (
         filtered_df.assign(TypeDisplay=type_disp)
-        .groupby('TypeDisplay', as_index=False)['PieAmount'].sum()
-        .rename(columns={'PieAmount': 'Total Amount'})
+        .groupby('TypeDisplay', as_index=False)['Final_Amount'].sum()
+        .rename(columns={'Final_Amount': 'Total Amount'})
     )
 
     if show_type_table:
@@ -521,8 +522,8 @@ else:
     with c2:
         type_disp = filtered_df['Type'].astype(str).str.strip().str.title()
         pie_df_type = (filtered_df.assign(TypeDisplay=type_disp)
-                       .groupby('TypeDisplay', as_index=False)['PieAmount'].sum())
-        pie_fig = px.pie(pie_df_type, names='TypeDisplay', values='PieAmount',
+                       .groupby('TypeDisplay', as_index=False)['Final_Amount'].sum())
+        pie_fig = px.pie(pie_df_type, names='TypeDisplay', values='Final_Amount',
                          title='Total Amount by Transaction Type', hole=0.4,
                          color_discrete_sequence=color_theme)
         pie_fig.update_traces(textposition='inside', textinfo='percent+label', marker_line_width=0)
@@ -543,8 +544,8 @@ else:
         st.plotly_chart(fig_user_exp, use_container_width=True)
 
     with c2:
-        pie_user_df = filtered_df.groupby('User', as_index=False)['PieAmount'].sum()
-        pie_user_fig = px.pie(pie_user_df, names='User', values='PieAmount',
+        pie_user_df = filtered_df.groupby('User', as_index=False)['Final_Amount'].sum()
+        pie_user_fig = px.pie(pie_user_df, names='User', values='Final_Amount',
                               title='Total Amount by User', hole=0.4,
                               color_discrete_sequence=color_theme)
         pie_user_fig.update_traces(textposition='inside', textinfo='percent+label', marker_line_width=0)
@@ -628,4 +629,3 @@ else:
                              color_discrete_sequence=color_theme)
             cat_fig.update_traces(textposition='inside', textinfo='percent+label', marker_line_width=0)
             st.plotly_chart(cat_fig, use_container_width=True)
-
