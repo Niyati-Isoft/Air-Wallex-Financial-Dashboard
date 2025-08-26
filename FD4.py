@@ -34,6 +34,7 @@ bal_file = st.sidebar.file_uploader("Upload Balance Activity Report CSV", type="
 # Guard: show UI first, don't read until something is uploaded
 if not exp_file and not bal_file:
     st.info("📁 Upload one or both files to begin.")
+    st.stop()
 elif not exp_file or not bal_file:
     st.error("❌ Please upload both files to proceed.")
     st.stop()
@@ -627,3 +628,4 @@ else:
                              color_discrete_sequence=color_theme)
             cat_fig.update_traces(textposition='inside', textinfo='percent+label', marker_line_width=0)
             st.plotly_chart(cat_fig, use_container_width=True)
+
