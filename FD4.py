@@ -17,8 +17,10 @@ elif 12 <= current_hour < 17:
     greeting = "Good Afternoon"
 elif 17 <= current_hour < 21:
     greeting = "Good Evening"
-else:
+elif 21 <= current_hour <= 23:
     greeting = "Good Night"
+elif 0 <= current_hour < 5:
+    greeting = "Hello Night Owl"
 st.markdown(f"<h4 style='text-align: center; color: grey;'>Hello, {greeting}! 👋</h4>", unsafe_allow_html=True)
 
 # Branding + title
@@ -629,3 +631,4 @@ else:
                              color_discrete_sequence=color_theme)
             cat_fig.update_traces(textposition='inside', textinfo='percent+label', marker_line_width=0)
             st.plotly_chart(cat_fig, use_container_width=True)
+
